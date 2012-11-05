@@ -10,6 +10,10 @@ void setup()
   pinMode(A2, INPUT);
   
   while (!Serial){;}  // Wait for serial connection
+  
+  // Send initial data to software
+  //Serial.print("dh\n");
+  //Serial.print("ts\n");
 }
 
 void loop()
