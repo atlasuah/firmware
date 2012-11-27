@@ -1,10 +1,10 @@
 boolean autoUpdate = false;
 char cmd;
-double y0, y1, y2;
+int y0, y1, y2;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(57600);
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
@@ -54,16 +54,13 @@ void loop()
   }
   if (autoUpdate)
   {
-    Serial.print("sf");
-    Serial.print(y0/57.89);
-    Serial.print("\n");
+    Serial.print("sf" + String(y0, DEC) + "\n");
+    delay(20);
     
-    Serial.print("sl");
-    Serial.print(y1/57.89);
-    Serial.print("\n");
+    Serial.print("sl" + String(y1, DEC) + "\n");
+    delay(20);
     
-    Serial.print("sr");
-    Serial.print(y2/57.89);
-    Serial.print("\n");
+    Serial.print("sr" + String(y2, DEC) + "\n");
+    delay(20);
   }
 }
