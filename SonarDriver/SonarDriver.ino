@@ -1,6 +1,7 @@
 boolean autoUpdate = false;
 char cmd;
-int y0, y1, y2;
+char tmp[12];
+unsigned int y0, y1, y2;
 
 void setup()
 {
@@ -9,11 +10,10 @@ void setup()
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
   
+  tmp[0] = '\0';
+  
   while (!Serial){;}  // Wait for serial connection
   
-  // Send initial data to software
-  //Serial.print("dh\n");
-  //Serial.print("ts\n");
 }
 
 void loop()
@@ -54,13 +54,16 @@ void loop()
   }
   if (autoUpdate)
   {
-    Serial.print("sf" + String(y0, DEC) + "\n");
+    sprintf(tmp, "sf%u\r\n", y0);
+    Serial.print(tmp);
     delay(20);
     
-    Serial.print("sl" + String(y1, DEC) + "\n");
+    sprintf(tmp, "sl%u\r\n", y1);
+    Serial.print(tmp);
     delay(20);
     
-    Serial.print("sr" + String(y2, DEC) + "\n");
+    sprintf(tmp, "sr%u\r\n", y2);
+    Serial.print(tmp);
     delay(20);
   }
 }
