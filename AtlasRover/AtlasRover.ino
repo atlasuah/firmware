@@ -8,18 +8,18 @@ Servo driveServo;
 #define DrivePin      8       // DON'T CHANGE!
 #define DriveArm      1000
 #define DriveDefault  1500    // Tare this for Drive Motor
-#define DriveMax      1200
-#define DriveMin      1800
-#define DriveDiff     30
-#define DriveDelay    5
+#define DriveMax      1100
+#define DriveMin      1900
+#define DriveDiff     40
+#define DriveDelay    0
 
 Servo turnServo;
 #define TurnPin       12      // DON'T CHANGE!
 #define TurnDefault   1500    // Tare this for Turn Motor
-#define TurnLeft      1200
-#define TurnRight     1800
-#define TurnDiff      30
-#define TurnDelay     5
+#define TurnLeft      1100
+#define TurnRight     1900
+#define TurnDiff      40
+#define TurnDelay     0
 
 boolean debugOutput = false;
 boolean autoUpdate = false;
@@ -124,8 +124,9 @@ void loop()
          sprintf(tmp, "DRIVE neg:%c amt:%c Rec:%i New:%i\n\r", neg, amt, aDrive, nDrive);
          Serial.print(tmp);
        }
-       break;
-     case 't':
+     //  break;
+     //case 't':
+       
        neg = char(Serial.read());
        aTurn = 1;         // Initialize aTurn
        switch (neg) {
@@ -146,8 +147,9 @@ void loop()
            break;
        }
        nTurn = TurnDefault + aTurn*TurnDiff;
+       driveServo.writeMicroseconds(nDrive);
        turnServo.writeMicroseconds(nTurn);
-       delay(TurnDelay);
+       //delay(TurnDelay);
        
        if (debugOutput) {
          sprintf(tmp, "TURN Rec: %i   New: %i\n\r", aTurn, nTurn);
