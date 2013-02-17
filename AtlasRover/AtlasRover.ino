@@ -268,11 +268,11 @@ void ManageCmd()
 
 void loop()
 {
-  //y0 = pulseIn(A0,HIGH);
-  //y1 = pulseIn(A1,HIGH);
-  //y2 = pulseIn(A2,HIGH);
+  y0 = pulseIn(A0,HIGH);
+  y1 = pulseIn(A1,HIGH);
+  y2 = pulseIn(A2,HIGH);
   
-  if (Serial.available() > 0)
+  if (Serial.available() > 63)
   {
     //cmd = char(Serial.read());
     readInStr = "";
