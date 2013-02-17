@@ -21,12 +21,18 @@ Servo turnServo;
 #define TurnDiff      40
 #define TurnDelay     0
 
-boolean debugOutput = false;
+boolean debugOutput = true;
 boolean autoUpdate = false;
 boolean outputCh = false;
 char cmd, amt, neg;
 char tmp[12];
+String cmdRead[10];
+String readInStr;
+String command;
+char readInChar;
 unsigned int y0, y1, y2, t0, t1, t2, i, aDrive, aTurn, nDrive, nTurn;
+const int CMD_MIN_SIM = 3;
+const int CMD_MIN_CNT = 6;
 
 ////#include <AP_Common.h>
 //#include <Arduino_Mega_ISR_Registry.h>
@@ -76,13 +82,110 @@ void setup()
   Serial.print("Welcome back!!!\r\n");
 }
 
-void loop()
+String DetermineCmd(String pD)
 {
-  y0 = pulseIn(A0,HIGH);
-  y1 = pulseIn(A1,HIGH);
-  y2 = pulseIn(A2,HIGH);
+  //int startTime = millis();
+  //int endTime = 0;
+  String ppD = pD;
   
-  if (Serial.available() > 0)
+  
+  
+  String retcmd = "";
+  String tmpcmd = "";
+  String tstr   = "";
+  String basecmd = "";
+  String cmdlist[10];
+  char c = pD[0];
+  int start = 0,
+      cmdindex = 0,
+      difcount = 0,
+      checkindex = 0,
+      maxCmdIndex = 0,
+      numCmds = 0;
+  int simcnt = 0;
+  
+  bool checkDone = false;
+
+  // Get list of cmds
+  while (pD.length() >= 8)
+  {
+    while (start < (pD.length() - 1) && pD[start] != '<')
+      start++;
+
+    // go ahead and trim the front of the string (it was garbage)
+    tstr = pD.substring(start);
+    pD = tstr;
+    start = 0;
+    		
+    if ((start + 8) <= pD.length())
+    {
+      tmpcmd = pD.substring(start, 8);
+      if (tmpcmd.indexOf('<', 1) == -1)
+      {
+        if (tmpcmd.indexOf('>', 7) != -1)
+        {
+          cmdlist[cmdindex] = tmpcmd;
+          cmdindex++;
+          tstr = pD.substring(start + 8);
+          pD = tstr;
+        }
+        else
+        {
+          tstr = pD.substring(start + 1);
+          pD = tstr;
+        }
+      }
+      else
+      {
+        tstr = pD.substring(start + 1);
+        pD = tstr;
+      }
+      start = 0;
+    }
+  }
+  numCmds = cmdindex;
+  maxCmdIndex = cmdindex - 1;
+  
+  // Check each cmd
+  if (numCmds >= CMD_MIN_CNT)
+  {
+    basecmd = cmdlist[0];
+    while (!checkDone)
+    {
+      for (int i = 0; i <= maxCmdIndex; i++)
+      {
+        if (basecmd == cmdlist[i])
+          simcnt++;
+      }
+      
+      if (simcnt >= CMD_MIN_SIM)      // If not enough other commands are similar
+      {
+        retcmd = basecmd;
+        checkDone = true;
+      }
+      else if (checkindex <= maxCmdIndex)
+      {
+        basecmd = cmdlist[checkindex];
+        checkindex++;
+        simcnt = 0;
+      }
+      else
+        return "FAIL - No commands passed similarity test";
+    }
+  }
+  else
+    return "FAIL - Not enough commands received (" + String(numCmds) + ")" + ppD;
+  
+  
+  //endTime = millis();
+  
+  return retcmd;
+}
+
+void ManageCmd()
+{
+  cmd = char(Serial.read());
+  if (cmd == '<')
   {
     cmd = char(Serial.read());
     switch (cmd)
@@ -107,25 +210,20 @@ void loop()
            aDrive = -1;   // Set negative
          case '-':    // And Negative Sign Here!
            amt = char(Serial.read());
-           if (amt == 'T')
-             aDrive *= 10;
-           else
-             aDrive *= (amt-'0');
+           aDrive *= (amt-'0');
            break;
          default:
            aDrive = 0;
            break;
        }
        nDrive = DriveDefault + aDrive*DriveDiff;
-       driveServo.writeMicroseconds(nDrive);
-       delay(DriveDelay);
+       //driveServo.writeMicroseconds(nDrive);
+       //delay(DriveDelay);
        
        if (debugOutput) {
          sprintf(tmp, "DRIVE neg:%c amt:%c Rec:%i New:%i\n\r", neg, amt, aDrive, nDrive);
          Serial.print(tmp);
        }
-     //  break;
-     //case 't':
        
        neg = char(Serial.read());
        aTurn = 1;         // Initialize aTurn
@@ -147,8 +245,8 @@ void loop()
            break;
        }
        nTurn = TurnDefault + aTurn*TurnDiff;
-       driveServo.writeMicroseconds(nDrive);
-       turnServo.writeMicroseconds(nTurn);
+       //driveServo.writeMicroseconds(nDrive);
+       //turnServo.writeMicroseconds(nTurn);
        //delay(TurnDelay);
        
        if (debugOutput) {
@@ -156,30 +254,39 @@ void loop()
          Serial.print(tmp);
        }
        break;
-     
-//     case 'f':              // Drive Forward
-//       Serial.print("df\n");
-//       break;
-//     case 'b':              // Drive Back
-//       Serial.print("db\n");
-//       break;
-//     case 'h':              // Halt
-//       Serial.print("dh\n");
-//       break;
-//     case 'l':              // Turn Left
-//       Serial.print("tl\n");
-//       break;
-//     case 'r':              // Turn Right
-//       Serial.print("tr\n");
-//       break;
-//     case 's':              // Turn Straight
-//       Serial.print("ts\n");
-//       break;
      default:
          sprintf(tmp, "ERROR: Got %c\n\r", cmd);
          Serial.print(tmp);
        break;
     }
+  }
+  else
+  {
+    
+  }
+}
+
+void loop()
+{
+  //y0 = pulseIn(A0,HIGH);
+  //y1 = pulseIn(A1,HIGH);
+  //y2 = pulseIn(A2,HIGH);
+  
+  if (Serial.available() > 0)
+  {
+    //cmd = char(Serial.read());
+    readInStr = "";
+    delay(10);    // Without this, it will read in one character then exit while loop
+    while (Serial.available() > 0)
+    {
+      readInChar = Serial.read();
+      readInStr.concat(readInChar);
+    }
+    command = DetermineCmd(readInStr);
+    //command = readInStr;
+    delay(20);
+    Serial.println(command);
+    //ReadSerial();
   }
   if (autoUpdate)
   {
