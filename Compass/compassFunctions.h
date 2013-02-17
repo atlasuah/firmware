@@ -17,7 +17,8 @@ void CompassSetup()
 
 
 
-float loop(){
+float getHeading()
+{
   
   int x,y,z; //triple axis data
 
