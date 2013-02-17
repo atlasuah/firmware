@@ -22,7 +22,7 @@ Servo turnServo;
 #define TurnDelay     0
 
 boolean debugOutput = true;
-boolean autoUpdate = false;
+boolean autoUpdate = true;
 boolean outputCh = false;
 char cmd, amt, neg;
 char tmp[12];
@@ -276,7 +276,7 @@ void loop()
   y1 = pulseIn(A1,HIGH);
   y2 = pulseIn(A2,HIGH);
   
-  if (Serial.available() > 63)
+  if (Serial.available() > 0)
   {
     //cmd = char(Serial.read());
     readInStr = "";
@@ -291,8 +291,9 @@ void loop()
       // It failed!
     }
     else {
+      
       aDrive = (command[3]-'0');
-      if (command[2] == '-')
+      if (command[2] == '+')    // NOT A MISTAKE!!!
         aDrive *= -1;
       
       aTurn = (command[6]-'0');
@@ -304,19 +305,27 @@ void loop()
       driveServo.writeMicroseconds(nDrive);
       turnServo.writeMicroseconds(nTurn);
       delay(TurnDelay);
+      
     }
     //command = readInStr;
-    delay(20);
-    Serial.println(command);
+    //delay(20);
+//    Serial.println(command);
+    
+    if (autoUpdate) {
+      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\n", y0, y1, y2);
+      Serial.print(tmp);
+    }
+    
     //ReadSerial();
   }
   
   if (autoUpdate)
   {
-    sprintf(tmp, "sf%u\r\n", y0);
-    Serial.print(tmp);
-    delay(20);
+    //sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\n", y0, y1, y2);
+    //Serial.print(tmp);
+    //delay(20);
     
+    /*
     sprintf(tmp, "sl%u\r\n", y1);
     Serial.print(tmp);
     delay(20);
@@ -324,6 +333,7 @@ void loop()
     sprintf(tmp, "sr%u\r\n", y2);
     Serial.print(tmp);
     delay(20);
+    */
   }
   if (outputCh)
   {
