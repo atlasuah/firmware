@@ -182,6 +182,8 @@ String DetermineCmd(String pD)
   return retcmd;
 }
 
+
+/*
 void ManageCmd()
 {
   cmd = char(Serial.read());
@@ -265,6 +267,8 @@ void ManageCmd()
     
   }
 }
+*/
+
 
 void loop()
 {
@@ -283,11 +287,30 @@ void loop()
       readInStr.concat(readInChar);
     }
     command = DetermineCmd(readInStr);
+    if (command[0] == 'F') {
+      // It failed!
+    }
+    else {
+      aDrive = (command[3]-'0');
+      if (command[2] == '-')
+        aDrive *= -1;
+      
+      aTurn = (command[6]-'0');
+      if (command[5] == '-')
+        aTurn *= -1;
+      
+      nDrive = DriveDefault + aDrive*DriveDiff;
+      nTurn = TurnDefault + aTurn*TurnDiff;
+      driveServo.writeMicroseconds(nDrive);
+      turnServo.writeMicroseconds(nTurn);
+      delay(TurnDelay);
+    }
     //command = readInStr;
     delay(20);
     Serial.println(command);
     //ReadSerial();
   }
+  
   if (autoUpdate)
   {
     sprintf(tmp, "sf%u\r\n", y0);
