@@ -30,7 +30,11 @@ String cmdRead[10];
 String readInStr;
 String command;
 char readInChar;
+
 unsigned int y0, y1, y2, t0, t1, t2, i, aDrive, aTurn, nDrive, nTurn;
+int driveCount = 10;
+int driveDir = 0;
+
 const int CMD_MIN_SIM = 3;
 const int CMD_MIN_CNT = 6;
 
@@ -84,12 +88,6 @@ void setup()
 
 String DetermineCmd(String pD)
 {
-  //int startTime = millis();
-  //int endTime = 0;
-  String ppD = pD;
-  
-  
-  
   String retcmd = "";
   String tmpcmd = "";
   String tstr   = "";
@@ -174,101 +172,10 @@ String DetermineCmd(String pD)
     }
   }
   else
-    return "FAIL - Not enough commands received (" + String(numCmds) + ")" + ppD;
-  
-  
-  //endTime = millis();
+    return "FAIL - Not enough commands received (" + String(numCmds) + ")";
   
   return retcmd;
 }
-
-
-/*
-void ManageCmd()
-{
-  cmd = char(Serial.read());
-  if (cmd == '<')
-  {
-    cmd = char(Serial.read());
-    switch (cmd)
-    {
-     case 'u':
-       autoUpdate = !autoUpdate;
-       break;
-     case 'b':
-       debugOutput = !debugOutput;
-       break;
-     case 'g':
-       outputCh = !outputCh;
-       break;
-     case 'd':
-       neg = char(Serial.read());
-       aDrive = 1;        // Initialize aDrive
-       switch (neg) {
-         case '0':
-           aDrive = 0;    // Set to zero
-           break;
-         case '+':  // NOT A MISTAKE - Positive Sign Here!
-           aDrive = -1;   // Set negative
-         case '-':    // And Negative Sign Here!
-           amt = char(Serial.read());
-           aDrive *= (amt-'0');
-           break;
-         default:
-           aDrive = 0;
-           break;
-       }
-       nDrive = DriveDefault + aDrive*DriveDiff;
-       //driveServo.writeMicroseconds(nDrive);
-       //delay(DriveDelay);
-       
-       if (debugOutput) {
-         sprintf(tmp, "DRIVE neg:%c amt:%c Rec:%i New:%i\n\r", neg, amt, aDrive, nDrive);
-         Serial.print(tmp);
-       }
-       
-       neg = char(Serial.read());
-       aTurn = 1;         // Initialize aTurn
-       switch (neg) {
-         case '0':
-           aTurn = 0;     // Set to zero
-           break;
-         case '-':
-           aTurn = -1;    // Set negative
-         case '+':
-           amt = char(Serial.read());
-           if (amt == 'T')
-             aTurn *= 10;
-           else
-             aTurn *= (amt-'0');
-           break;
-         default:
-           aTurn = 0;
-           break;
-       }
-       nTurn = TurnDefault + aTurn*TurnDiff;
-       //driveServo.writeMicroseconds(nDrive);
-       //turnServo.writeMicroseconds(nTurn);
-       //delay(TurnDelay);
-       
-       if (debugOutput) {
-         sprintf(tmp, "TURN Rec: %i   New: %i\n\r", aTurn, nTurn);
-         Serial.print(tmp);
-       }
-       break;
-     default:
-         sprintf(tmp, "ERROR: Got %c\n\r", cmd);
-         Serial.print(tmp);
-       break;
-    }
-  }
-  else
-  {
-    
-  }
-}
-*/
-
 
 void loop()
 {
@@ -278,7 +185,6 @@ void loop()
   
   if (Serial.available() > 0)
   {
-    //cmd = char(Serial.read());
     readInStr = "";
     delay(10);    // Without this, it will read in one character then exit while loop
     while (Serial.available() > 0)
@@ -291,7 +197,6 @@ void loop()
       // It failed!
     }
     else {
-      
       aDrive = (command[3]-'0');
       if (command[2] == '+')    // NOT A MISTAKE!!!
         aDrive *= -1;
@@ -305,36 +210,17 @@ void loop()
       driveServo.writeMicroseconds(nDrive);
       turnServo.writeMicroseconds(nTurn);
       delay(TurnDelay);
-      
     }
     //command = readInStr;
     //delay(20);
 //    Serial.println(command);
     
     if (autoUpdate) {
-      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\n", y0, y1, y2);
+      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\nd%d\r\n%d\r\n", y0, y1, y2, driveDir, driveCount);
       Serial.print(tmp);
     }
-    
-    //ReadSerial();
   }
   
-  if (autoUpdate)
-  {
-    //sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\n", y0, y1, y2);
-    //Serial.print(tmp);
-    //delay(20);
-    
-    /*
-    sprintf(tmp, "sl%u\r\n", y1);
-    Serial.print(tmp);
-    delay(20);
-    
-    sprintf(tmp, "sr%u\r\n", y2);
-    Serial.print(tmp);
-    delay(20);
-    */
-  }
   if (outputCh)
   {
 //    for (i = 0; i < 5; i++){
