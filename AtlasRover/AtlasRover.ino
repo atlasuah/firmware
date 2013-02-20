@@ -3,6 +3,8 @@
 // Last updated 1/15/2013 - JLB
 
 #include <Servo.h>
+#include <avr/interrupt.h>
+#include <avr/wdt.h>
 
 Servo driveServo;
 #define DrivePin      8       // DON'T CHANGE!
@@ -47,6 +49,26 @@ const int CMD_MIN_CNT = 6;
 
 void setup()
 {
+  
+  cli();                                //Disable all interrupts.
+  MCUSR &= ~(1<<WDRF);			// Clear WDRF if it has been unintentionally set. 
+  WDTCSR = (1<<WDCE )|(1<<WDE );	// Enable configuration change. 
+  WDTCSR = (1<<WDIF)|(1<<WDIE)|	        // Enable Watchdog Interrupt Mode. 
+	(1<<WDCE )|(0<<WDE )|	        // Disable Watchdog System Reset Mode if unintentionally enabled. 
+
+        // Set Watchdog Timeout period to 32 ms.
+        //(0<<WDP3 )|(0<<WDP2 )|(0<<WDP1)|(1<<WDP0);
+        
+        // Set Watchdog Timeout period to 64 ms.
+        (0<<WDP3 )|(0<<WDP2 )|(1<<WDP1)|(0<<WDP0);
+        
+        // Set Watchdog Timeout period to 128 ms.
+        //(0<<WDP3 )|(0<<WDP2 )|(1<<WDP1)|(1<<WDP0);
+        
+        // Set Watchdog Timeout period to 256 ms or ~.25 sec.
+        //(0<<WDP3 )|(1<<WDP2 )|(0<<WDP1)|(0<<WDP0);		  
+
+  sei();                                //Enable all interrupts.
   
 //  isr_registry.init();
 //  APM_RC.Init(&isr_registry);          // APM Radio initialization
@@ -197,6 +219,8 @@ void loop()
       // It failed!
     }
     else {
+      wdt_reset();              //Call this to reset the timer's value.
+      
       aDrive = (command[3]-'0');
       if (command[2] == '+')    // NOT A MISTAKE!!!
         aDrive *= -1;
@@ -229,4 +253,11 @@ void loop()
 //    }
 //    Serial.print("\r\n");
   }
+}
+
+ISR(WDT_vect)
+{
+      driveServo.writeMicroseconds(DriveDefault);
+      turnServo.writeMicroseconds(TurnDefault);
+      wdt_reset();              //Call this to reset the timer's value.
 }
