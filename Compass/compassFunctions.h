@@ -1,4 +1,4 @@
-#include <Wire.h> //I2C Arduino Library
+//#include <Wire.h> //I2C Arduino Library to be included in the actual .ino
 #include <math.h>
 
 #define address 0x1E //0011110b, I2C 7bit address of HMC5883
