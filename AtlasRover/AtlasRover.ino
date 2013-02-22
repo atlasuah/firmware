@@ -3,8 +3,10 @@
 // Last updated 1/15/2013 - JLB
 
 #include <Servo.h>
+#include <Wire.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
+#include "compassFunctions.h"
 
 Servo driveServo;
 #define DrivePin      8       // DON'T CHANGE!
@@ -36,6 +38,7 @@ char readInChar;
 unsigned int y0, y1, y2, t0, t1, t2, i, aDrive, aTurn, nDrive, nTurn;
 int driveCount = 10;
 int driveDir = 0;
+float heading;
 
 const int CMD_MIN_SIM = 3;
 const int CMD_MIN_CNT = 6;
@@ -103,6 +106,9 @@ void setup()
   cmd = amt = neg = '\0';
   
   y0 = y1 = y2 = t0 = t1 = t2 = aDrive = aTurn = nDrive = nTurn = 0;
+  
+  CompassSetup();
+  heading = getHeading();
   
   while (!Serial){;}  // Wait for serial connection
   Serial.print("Welcome back!!!\r\n");
