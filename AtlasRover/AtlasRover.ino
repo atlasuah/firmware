@@ -63,13 +63,13 @@ void setup()
         //(0<<WDP3 )|(0<<WDP2 )|(0<<WDP1)|(1<<WDP0);
         
         // Set Watchdog Timeout period to 64 ms.
-        (0<<WDP3 )|(0<<WDP2 )|(1<<WDP1)|(0<<WDP0);
+        //(0<<WDP3 )|(0<<WDP2 )|(1<<WDP1)|(0<<WDP0);
         
         // Set Watchdog Timeout period to 128 ms.
         //(0<<WDP3 )|(0<<WDP2 )|(1<<WDP1)|(1<<WDP0);
         
         // Set Watchdog Timeout period to 256 ms or ~.25 sec.
-        //(0<<WDP3 )|(1<<WDP2 )|(0<<WDP1)|(0<<WDP0);		  
+        (0<<WDP3 )|(1<<WDP2 )|(0<<WDP1)|(0<<WDP0);		  
 
   sei();                                //Enable all interrupts.
   
@@ -246,7 +246,8 @@ void loop()
 //    Serial.println(command);
     
     if (autoUpdate) {
-      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\nd%d\r\n%d\r\n", y0, y1, y2, driveDir, driveCount);
+      driveDir = (int)getHeading();
+      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\nd%d\r\n%d", y0, y1, y2, driveDir);
       Serial.print(tmp);
     }
   }
