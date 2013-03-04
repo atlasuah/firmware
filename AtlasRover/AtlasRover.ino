@@ -1,6 +1,6 @@
-// SonarDriver.ino
-// Drives the Rover around and Polls the SONAR sensors
-// Last updated 1/15/2013 - JLB
+// AtlasRover.ino
+// Main firmware for rover
+// Team 4 | CPE 496-01 | Spring 2013
 
 #include <Servo.h>
 #include <Wire.h>
@@ -256,18 +256,14 @@ void loop()
     }
     //command = readInStr;
     //delay(20);
-//    Serial.println(command);
+    //Serial.println(command);
     
     if (autoUpdate) {
       driveDir = (int)getHeading();
       int encoderDelta = encoderCount;
       encoderCount = 0;
-      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\ne%i\r\nd%d\r\n",
-              y0, y1, y2, encoderCount, driveDir);
-//      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\nd%d\r\n",
-//              y0, y1, y2, driveDir);
-//      sprintf(tmp, "d%d\r\n",
-//              driveDir);
+      sprintf(tmp, "%u_%u_%u_%i_%d\r\n",
+              y0, y1, y2, encoderDelta, driveDir);  // fwd left right encoder direction
       Serial.print(tmp);
     }
   }
