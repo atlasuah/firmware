@@ -29,11 +29,12 @@ boolean debugOutput = true;
 boolean autoUpdate = true;
 boolean outputCh = false;
 char cmd, amt, neg;
-char tmp[12];
+char tmp[42];
 String cmdRead[10];
 String readInStr;
 String command;
 char readInChar;
+int encoderCount;
 
 unsigned int y0, y1, y2, t0, t1, t2, i, aDrive, aTurn, nDrive, nTurn;
 int driveCount = 10;
@@ -94,12 +95,16 @@ void setup()
   turnServo.attach(TurnPin);
   turnServo.writeMicroseconds(TurnDefault);
   delay(1000);
-  
+
+  encoderCount = 0;  
     
   Serial.begin(57600);
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
+  pinMode(3, INPUT);
+  
+  attachInterrupt(0, encoderTick, RISING);
   
   tmp[0] = '\0';
   
@@ -112,6 +117,14 @@ void setup()
   
   while (!Serial){;}  // Wait for serial connection
   Serial.print("Welcome back!!!\r\n");
+}
+
+void encoderTick()
+{
+  if(digitalRead(3))
+    encoderCount++;
+  else
+    encoderCount--;
 }
 
 String DetermineCmd(String pD)
@@ -247,7 +260,14 @@ void loop()
     
     if (autoUpdate) {
       driveDir = (int)getHeading();
-      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\nd%d\r\n%d", y0, y1, y2, driveDir);
+      int encoderDelta = encoderCount;
+      encoderCount = 0;
+      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\ne%i\r\nd%d\r\n",
+              y0, y1, y2, encoderCount, driveDir);
+//      sprintf(tmp, "sf%u\r\nsl%u\r\nsr%u\r\nd%d\r\n",
+//              y0, y1, y2, driveDir);
+//      sprintf(tmp, "d%d\r\n",
+//              driveDir);
       Serial.print(tmp);
     }
   }
