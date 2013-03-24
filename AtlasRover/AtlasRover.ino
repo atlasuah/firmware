@@ -40,6 +40,7 @@ unsigned int y0, y1, y2, t0, t1, t2, i, aDrive, aTurn, nDrive, nTurn;
 int driveCount = 10;
 int driveDir = 0;
 float heading;
+const float COMPASS_OFFSET = -90;
 
 const int CMD_MIN_SIM = 3;
 const int CMD_MIN_CNT = 6;
@@ -259,7 +260,7 @@ void loop()
     //Serial.println(command);
     
     if (autoUpdate) {
-      driveDir = (int)getHeading();
+      driveDir = (int)getHeading() + COMPASS_OFFSET;
       int encoderDelta = encoderCount;
       encoderCount = 0;
       sprintf(tmp, "%u_%u_%u_%i_%d\r\n",
