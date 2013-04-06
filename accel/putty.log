@@ -1,0 +1,110 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2013.04.06 17:32:05 =~=~=~=~=~=~=~=~=~=~=~=
+InvenSense MPU-6050
+June 2012
+WHO_AM_I : A4, error = 2
+PWR_MGMT_2 : A4, error = 2
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 2, 1, -12032
+temperature: 23.050 degrees Celsius
+gyro x,y,z : 3, 24740, -12798, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 512, 256, 209
+temperature: 62.053 degrees Celsius
+gyro x,y,z : 768, -23456, 718, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 2, 1, -12032
+temperature: 23.050 degrees Celsius
+gyro x,y,z : 3, 24740, -12798, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 512, 256, 209
+temperature: 62.053 degrees Celsius
+gyro x,y,z : 768, -23456, 718, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 2, 1, -12032
+temperature: 23.050 degrees Celsius
+gyro x,y,z : 67, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 512, 256, 209
+temperature: 62.053 degrees Celsius
+gyro x,y,z : 17152, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 2, 1, -12032
+temperature: 23.050 degrees Celsius
+gyro x,y,z : 67, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 512, 256, 209
+temperature: 62.053 degrees Celsius
+gyro x,y,z : 17152, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 2, 1, -12032
+temperature: 23.050 degrees Celsius
+gyro x,y,z : 67, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 512, 256, 209
+temperature: 62.053 degrees Celsius
+gyro x,y,z : 17152, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 2, 1, -12032
+temperature: 23.050 degrees Celsius
+gyro x,y,z : 67, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 512, 256, 209
+temperature: 62.053 degrees Celsius
+gyro x,y,z : 17152, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 2, 1, -12032
+temperature: 23.050 degrees Celsius
+gyro x,y,z : 67, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 512, 256, 209
+temperature: 62.053 degrees Celsius
+gyro x,y,z : 17152, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 2, 1, -12032
+temperature: 23.050 degrees Celsius
+gyro x,y,z : 232, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 512, 256, 209
+temperature: 62.053 degrees Celsius
+gyro x,y,z : -6144, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyro, error = 2
+accel x,y,z: 2, 1, -12032
+temperature: 23.050 degrees Celsius
+gyro x,y,z : 232, 0, 0, 
+
+MPU-6050
+Read accel, temp and gyr
