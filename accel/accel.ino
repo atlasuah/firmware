@@ -14,6 +14,12 @@ void regWrite(int reg, int data);
 uint8_t regRead(int reg);
 void initHardware();
 
+int accelx();
+int accely();
+int accelz();
+
+int 
+
 void setup()
 {
   Serial.begin(9600);
@@ -26,11 +32,13 @@ void setup()
 
 void loop()
 {
-  int id = regRead(WHO_AM_I);
-  Serial.print("Id: ");
-  Serial.println(id);
-  
-  delay(1000);
+  Serial.print("accel: X:");
+  Serial.print(accelx());
+  Serial.print("  Y:");
+  Serial.print(accely());
+  Serial.print("  Z:");
+  Serial.println(accelz());
+  delay(10);
 }
 
 void regWrite(int reg, int data)
@@ -54,10 +62,10 @@ uint8_t regRead(int reg)
 
 void initHardware()
 {
-  SPI.begin();  // start the SPI library
-  SPI.setClockDivider(SPI_CLOCK_DIV2);  // setting SPI at 4Mhz
-  SPI.setBitOrder(MSBFIRST);  // data delivered MSB first
-  SPI.setDataMode(SPI_MODE0);  // latched on rising edge, transitioned on falling edge, active low
+  SPI.begin();  
+  SPI.setClockDivider(SPI_CLOCK_DIV2); 
+  SPI.setBitOrder(MSBFIRST);  
+  SPI.setDataMode(SPI_MODE0);
   
   pinMode(chip_select, OUTPUT);
   digitalWrite(chip_select, HIGH);
@@ -68,10 +76,10 @@ void initHardware()
   int tries;
   for(tries = 0; tries < 5; tries++)
   {
-    regWrite(PWR_MGMT_1, 0x08);    //set the rest bit
+    regWrite(PWR_MGMT_1, 0x08);     //set the rest bit
     delay(100);                     //wait for reset
     
-    regWrite(PWR_MGMT_1, 0x03);    //select gyro z as the clock source
+    regWrite(PWR_MGMT_1, 0x03);     //select gyro z as the clock source
     delay(5);
     
     if(regRead(PWR_MGMT_1) == 0x03) break;     //If reg is set, chip has reset and been set
@@ -80,7 +88,53 @@ void initHardware()
   regWrite(SMPRT_DIV, 0x00);
   regWrite(DLPF_CFG, 0x03);
   regWrite(FS_SEL, 0x00);
-  regWrite(AFS_SEL, 0x00);
-  
-  
+  regWrite(AFS_SEL, 0x00); 
 }
+
+int accelx()
+{
+  uint8_t accelx_H = regRead(0x3B, chip_select);
+  uint8_t accelx_L = regRead(0x3C, chip_select);
+  int16_t accelx = accelx_H << 8 | accelx_L;
+  return(accelx);
+}
+
+int accely()
+{
+  uint8_t accely_H = regRead(0x3D, chip_select);
+  uint8_t accely_L = regRead(0x3E, chip_select);
+  int16_t accely = accely_H << 8 | accely_L;
+  return(accely);
+}
+
+int accelz()
+{
+  uint8_t accelz_H = regRead(0x3F, chip_select);
+  uint8_t accelz_L = regRead(0x40, chip_select);
+  int16_t accelz = accelz_H << 8 | accelz_L;
+  return(accelz);
+}
+/*
+int GyroX(int ChipSelPin)
+{
+  uint8_t GyroX_H=SPIread(0x43,ChipSelPin);
+  uint8_t GyroX_L=SPIread(0x44,ChipSelPin);
+  int16_t GyroX=GyroX_H<<8|GyroX_L;
+  return(GyroX);
+}
+
+int GyroY(int ChipSelPin)
+{
+  uint8_t GyroY_H=SPIread(0x45,ChipSelPin);
+  uint8_t GyroY_L=SPIread(0x46,ChipSelPin);
+  int16_t GyroY=GyroY_H<<8|GyroY_L;
+  return(GyroY);
+}
+
+int GyroZ(int ChipSelPin)
+{
+  uint8_t GyroZ_H=SPIread(0x47,ChipSelPin);
+  uint8_t GyroZ_L=SPIread(0x48,ChipSelPin);
+  int16_t GyroZ=GyroZ_H<<8|GyroZ_L;
+  return(GyroZ);
+}*/
