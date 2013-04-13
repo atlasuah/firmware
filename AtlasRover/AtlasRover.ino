@@ -6,7 +6,9 @@
 #include <Wire.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
+#include <SPI.h>
 #include "compassFunctions.h"
+#include "accel_gyro.h"
 
 Servo driveServo;
 #define DrivePin      8       // DON'T CHANGE!
@@ -114,6 +116,7 @@ void setup()
   y0 = y1 = y2 = t0 = t1 = t2 = aDrive = aTurn = nDrive = nTurn = 0;
   
   CompassSetup();
+  initAccelGyro();
   heading = getHeading();
   
   while (!Serial){;}  // Wait for serial connection
