@@ -21,7 +21,7 @@ Servo driveServo;
 
 Servo turnServo;
 #define TurnPin       12      // DON'T CHANGE!
-#define TurnDefault   1500    // Tare this for Turn Motor
+#define TurnDefault   1475    // Tare this for Turn Motor
 #define TurnLeft      1100
 #define TurnRight     1900
 #define TurnDiff      40
@@ -266,8 +266,10 @@ void loop()
       driveDir = (int)getHeading() + COMPASS_OFFSET;
       int encoderDelta = encoderCount;
       encoderCount = 0;
-      sprintf(tmp, "%u_%u_%u_%i_%d\r\n",
-              y0, y1, y2, encoderDelta, driveDir);  // fwd left right encoder direction
+	  // fwd left right encoder direction accelX accelY accelZ gyroX gyroY gyroZ
+      sprintf(tmp, "%u_%u_%u_%i_%d_%i_%i_%i_%i_%i_%i\r\n",
+              y0, y1, y2, encoderDelta, driveDir, accelx(), accely(),accelz(),
+			  gyrox(), gyroy(), gyroz());
       Serial.print(tmp);
     }
   }
