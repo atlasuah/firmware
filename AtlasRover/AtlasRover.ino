@@ -21,7 +21,7 @@ Servo driveServo;
 
 Servo turnServo;
 #define TurnPin       12      // DON'T CHANGE!
-#define TurnDefault   1475    // Tare this for Turn Motor
+#define TurnDefault   1500    // Tare this for Turn Motor
 #define TurnLeft      1100
 #define TurnRight     1900
 #define TurnDiff      40
@@ -47,12 +47,6 @@ const float COMPASS_OFFSET = -90;
 const int CMD_MIN_SIM = 3;
 const int CMD_MIN_CNT = 6;
 
-////#include <AP_Common.h>
-//#include <Arduino_Mega_ISR_Registry.h>
-//#include <APM_RC.h> // ArduPilot Mega RC Library
-//
-//Arduino_Mega_ISR_Registry isr_registry;
-//APM_RC_APM2 APM_RC;
 
 void setup()
 {
@@ -77,17 +71,6 @@ void setup()
 
   sei();                                //Enable all interrupts.
   
-//  isr_registry.init();
-//  APM_RC.Init(&isr_registry);          // APM Radio initialization
-//    
-//  APM_RC.enable_out(CH_1);
-//  APM_RC.enable_out(CH_2);
-//  APM_RC.enable_out(CH_3);
-//  APM_RC.enable_out(CH_4);
-//  APM_RC.enable_out(CH_5);
-//  APM_RC.enable_out(CH_6);
-//  APM_RC.enable_out(CH_7);
-//  APM_RC.enable_out(CH_8);
   
   digitalWrite(DrivePin, LOW);
   driveServo.attach(DrivePin);
@@ -266,21 +249,10 @@ void loop()
       driveDir = (int)getHeading() + COMPASS_OFFSET;
       int encoderDelta = encoderCount;
       encoderCount = 0;
-	  // fwd left right encoder direction accelX accelY accelZ gyroX gyroY gyroZ
-      sprintf(tmp, "%u_%u_%u_%i_%d_%i_%i_%i_%i_%i_%i\r\n",
-              y0, y1, y2, encoderDelta, driveDir, accelx(), accely(),accelz(),
-			  gyrox(), gyroy(), gyroz());
+      sprintf(tmp, "%u_%u_%u_%i_%d\r\n",
+              y0, y1, y2, encoderDelta, driveDir);  // fwd left right encoder direction
       Serial.print(tmp);
     }
-  }
-  
-  if (outputCh)
-  {
-//    for (i = 0; i < 5; i++){
-//      sprintf(tmp, "C[%i] = %u, ", i, APM_RC.OutputCh_current(i));
-//      Serial.print(tmp);
-//    }
-//    Serial.print("\r\n");
   }
 }
 
