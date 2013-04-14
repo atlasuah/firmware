@@ -21,7 +21,7 @@ Servo driveServo;
 
 Servo turnServo;
 #define TurnPin       12      // DON'T CHANGE!
-#define TurnDefault   1500    // Tare this for Turn Motor
+#define TurnDefault   1475    // Tare this for Turn Motor   (was 1500)
 #define TurnLeft      1100
 #define TurnRight     1900
 #define TurnDiff      40
@@ -37,6 +37,10 @@ String readInStr;
 String command;
 char readInChar;
 int encoderCount;
+
+int gyro_buff[3];
+int gyro_cnt = 0;
+int gyro_avg = 0;
 
 unsigned int y0, y1, y2, t0, t1, t2, i, aDrive, aTurn, nDrive, nTurn;
 int driveCount = 10;
@@ -67,7 +71,13 @@ void setup()
         //(0<<WDP3 )|(0<<WDP2 )|(1<<WDP1)|(1<<WDP0);
         
         // Set Watchdog Timeout period to 256 ms or ~.25 sec.
-        (0<<WDP3 )|(1<<WDP2 )|(0<<WDP1)|(0<<WDP0);		  
+        (0<<WDP3 )|(1<<WDP2 )|(0<<WDP1)|(0<<WDP0);	
+        
+        
+  TCCR4B = (1<<CS42);
+  OCR4A  = 1250;
+  TIMSK4 = TIMSK4|(1 << OCIE4A);
+  TCNT4 = 0;	  
 
   sei();                                //Enable all interrupts.
   
@@ -101,6 +111,12 @@ void setup()
   CompassSetup();
   initAccelGyro();
   heading = getHeading();
+  
+  gyro_buff[0] = gyroz();
+  gyro_buff[1] = gyroz();
+  gyro_buff[2] = gyroz();
+  
+  gyro_avg = (gyro_buff[0] + gyro_buff[1] + gyro_buff[2])/3;
   
   while (!Serial){;}  // Wait for serial connection
   Serial.print("Welcome back!!!\r\n");
@@ -249,8 +265,10 @@ void loop()
       driveDir = (int)getHeading() + COMPASS_OFFSET;
       int encoderDelta = encoderCount;
       encoderCount = 0;
-      sprintf(tmp, "%u_%u_%u_%i_%d\r\n",
-              y0, y1, y2, encoderDelta, driveDir);  // fwd left right encoder direction
+      // fwd left right encoder direction accelX accelY accelZ gyroX gyroY gyroZ
+      sprintf(tmp, "%u_%u_%u_%i_%d_%i_%i_%i_%i_%i_%i\r\n",
+              y0, y1, y2, encoderDelta, driveDir, accelx(), accely(),accelz(),
+        gyrox(), gyroy(), gyro_avg);
       Serial.print(tmp);
     }
   }
@@ -262,3 +280,11 @@ ISR(WDT_vect)
       turnServo.writeMicroseconds(TurnDefault);
       wdt_reset();              //Call this to reset the timer's value.
 }
+
+/*ISR(TIMER4_COMPA_vect)
+{
+    gyro_buff[gyro_cnt] = gyroz();
+    gyro_avg = (gyro_buff[0] + gyro_buff[1] + gyro_buff[2])/3;
+    gyro_cnt++;
+    gyro_cnt = gyro_cnt%3;
+}*/
