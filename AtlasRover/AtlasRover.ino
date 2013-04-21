@@ -21,15 +21,19 @@ Servo driveServo;
 
 Servo turnServo;
 #define TurnPin       12      // DON'T CHANGE!
-#define TurnDefault   1475    // Tare this for Turn Motor   (was 1500)
+#define TurnDefault   1460    // Tare this for Turn Motor   (was 1500)
 #define TurnLeft      1100
 #define TurnRight     1900
 #define TurnDiff      40
 #define TurnDelay     0
 
-boolean debugOutput = true;
-boolean autoUpdate = true;
-boolean outputCh = false;
+#define SonarFront    A0
+#define SonarLeft     A1
+#define SonarRight    A2
+
+#define EncoderPin    3
+
+boolean sendHeartbeat = true;    // Default to always sending heartbeat
 char cmd, amt, neg;
 char tmp[42];
 String cmdRead[10];
@@ -42,24 +46,23 @@ int gyro_buff[3];
 int gyro_cnt = 0;
 int gyro_avg = 0;
 
-unsigned int y0, y1, y2, t0, t1, t2, i, aDrive, aTurn, nDrive, nTurn;
+unsigned int i, aDrive, aTurn, nDrive, nTurn;
+int t0, t1, t2;
 int driveCount = 10;
 int driveDir = 0;
 float heading;
-const float COMPASS_OFFSET = -90;
 
 const int CMD_MIN_SIM = 3;
 const int CMD_MIN_CNT = 6;
 
-
 void setup()
 {
   
-  cli();                                //Disable all interrupts.
+  cli();                                // Disable all interrupts.
   MCUSR &= ~(1<<WDRF);			// Clear WDRF if it has been unintentionally set. 
   WDTCSR = (1<<WDCE )|(1<<WDE );	// Enable configuration change. 
   WDTCSR = (1<<WDIF)|(1<<WDIE)|	        // Enable Watchdog Interrupt Mode. 
-	(1<<WDCE )|(0<<WDE )|	        // Disable Watchdog System Reset Mode if unintentionally enabled. 
+    (1<<WDCE )|(0<<WDE )|	        // Disable Watchdog System Reset Mode if unintentionally enabled. 
 
         // Set Watchdog Timeout period to 32 ms.
         //(0<<WDP3 )|(0<<WDP2 )|(0<<WDP1)|(1<<WDP0);
@@ -71,15 +74,14 @@ void setup()
         //(0<<WDP3 )|(0<<WDP2 )|(1<<WDP1)|(1<<WDP0);
         
         // Set Watchdog Timeout period to 256 ms or ~.25 sec.
-        (0<<WDP3 )|(1<<WDP2 )|(0<<WDP1)|(0<<WDP0);	
-        
-        
+        (0<<WDP3 )|(1<<WDP2 )|(0<<WDP1)|(0<<WDP0);
+	
   /*TCCR4B = (1<<CS42);
   OCR4B  = 1250;
   TIMSK4 = TIMSK4|(1 << OCIE4B);
   TCNT4 = 0;*/	  
 
-  sei();                                //Enable all interrupts.
+  sei();                                // Enable all interrupts.
   
   
   digitalWrite(DrivePin, LOW);
@@ -95,18 +97,18 @@ void setup()
   encoderCount = 0;  
     
   Serial.begin(57600);
-  pinMode(A0, INPUT);
-  pinMode(A1, INPUT);
-  pinMode(A2, INPUT);
-  pinMode(3, INPUT);
+  pinMode(SonarFront, INPUT);    // Front sonar
+  pinMode(SonarLeft, INPUT);     // Left sonar
+  pinMode(SonarRight, INPUT);    // Right sonar
+  pinMode(A4, OUTPUT);           // Initial sonar trigger
+  pinMode(EncoderPin, INPUT);    // Encoder
   
   attachInterrupt(0, encoderTick, RISING);
   
   tmp[0] = '\0';
-  
   cmd = amt = neg = '\0';
-  
-  y0 = y1 = y2 = t0 = t1 = t2 = aDrive = aTurn = nDrive = nTurn = 0;
+  aDrive = aTurn = nDrive = nTurn = 0;
+  t0 = t1 = t2 = 0;
   
   CompassSetup();
   initAccelGyro();
@@ -119,15 +121,10 @@ void setup()
   gyro_avg = (gyro_buff[0] + gyro_buff[1] + gyro_buff[2])/3;
   
   while (!Serial){;}  // Wait for serial connection
-  Serial.print("Welcome back!!!\r\n");
-}
-
-void encoderTick()
-{
-  if(digitalRead(3))
-    encoderCount++;
-  else
-    encoderCount--;
+  
+  digitalWrite(A4, HIGH);  // Trigger sonar's to begin polling
+  delay(20);
+  pinMode(A4, INPUT);      // Return to High Impedence state
 }
 
 String DetermineCmd(String pD)
@@ -223,10 +220,6 @@ String DetermineCmd(String pD)
 
 void loop()
 {
-  //y0 = pulseIn(A0,HIGH);
-  //y1 = pulseIn(A1,HIGH);
-  //y2 = pulseIn(A2,HIGH);
-  
   if (Serial.available() > 0)
   {
     readInStr = "";
@@ -253,32 +246,44 @@ void loop()
       
       nDrive = DriveDefault + aDrive*DriveDiff;
       nTurn = TurnDefault + aTurn*TurnDiff;
-      driveServo.writeMicroseconds(nDrive);
-      turnServo.writeMicroseconds(nTurn);
+      driveServo.writeMicroseconds(nDrive);    // Set speed servo
+      turnServo.writeMicroseconds(nTurn);      // Set turn servo
       delay(TurnDelay);
     }
-    //command = readInStr;
-    //delay(20);
-    //Serial.println(command);
     
-    if (autoUpdate) {
-      driveDir = (int)getHeading() + COMPASS_OFFSET;
-      int encoderDelta = encoderCount;
-      encoderCount = 0;
+    if (sendHeartbeat) {
+      t0 = analogRead(SonarFront);  // Read front sonar
+      t1 = analogRead(SonarLeft);   // Read left sonar
+      t2 = analogRead(SonarRight);  // Read right sonar
+      driveDir = (int)getHeading(); // Get compass heading
+      cli();    // Disable all interrupts
+      int encoderDelta = encoderCount;  // Copy current encoder value
+      encoderCount = 0;                 // Reset current encoder value
+      sei();    // Enable all interrupts
       // fwd left right encoder direction accelX accelY accelZ gyroX gyroY gyroZ
-      sprintf(tmp, "%u_%u_%u_%i_%d_%i_%i_%i_%i_%i_%i\r\n",
-              y0, y1, y2, encoderDelta, driveDir, accelx(), accely(),accelz(),
-        gyrox(), gyroy(), gyroz()); //gyro_avg);
-      Serial.print(tmp);
+      sprintf(tmp, "%i_%i_%i_%i_%d_%i_%i_%i_%i_%i_%i\r\n",
+              t0, t1, t2, encoderDelta, driveDir, accelx(), accely(),accelz(),
+	      gyrox(), gyroy(), gyroz()); //gyro_avg);
+      Serial.print(tmp);    // Send string to GUI
     }
   }
 }
 
+// Encoder interrupt function
+void encoderTick()
+{
+  if(digitalRead(EncoderPin))
+    encoderCount++;    // Forward motion, increment counter
+  else
+    encoderCount--;    // Reverse motion, decrement counter
+}
+
+// Watchdog timer function
 ISR(WDT_vect)
 {
-      driveServo.writeMicroseconds(DriveDefault);
-      turnServo.writeMicroseconds(TurnDefault);
-      wdt_reset();              //Call this to reset the timer's value.
+  driveServo.writeMicroseconds(DriveDefault);
+  turnServo.writeMicroseconds(TurnDefault);
+  wdt_reset();              //Call this to reset the timer's value.
 }
 
 /*ISR(TIMER4_COMPB_vect)

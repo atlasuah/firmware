@@ -14,11 +14,8 @@ void CompassSetup()
   Wire.endTransmission();
 }
 
-
-
 float getHeading()
 {
-  
   int x,y,z; //triple axis data
 
   //Tell the HMC5883 where to begin reading data
@@ -26,7 +23,6 @@ float getHeading()
   Wire.write(0x03); //select register 3, X MSB register
   Wire.endTransmission();
   
- 
  //Read data from each axis, 2 registers per axis
   Wire.requestFrom(address, 6);
   if(6<=Wire.available()){
