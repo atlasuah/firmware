@@ -83,7 +83,6 @@ void setup()
 
   sei();                                // Enable all interrupts.
   
-  
   digitalWrite(DrivePin, LOW);
   driveServo.attach(DrivePin);
   driveServo.writeMicroseconds(DriveArm);
