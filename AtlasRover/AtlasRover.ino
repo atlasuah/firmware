@@ -42,10 +42,6 @@ String command;
 char readInChar;
 int encoderCount;
 
-int gyro_buff[3];
-int gyro_cnt = 0;
-int gyro_avg = 0;
-
 unsigned int i, aDrive, aTurn, nDrive, nTurn;
 int t0, t1, t2;
 int driveCount = 10;
@@ -76,11 +72,7 @@ void setup()
         // Set Watchdog Timeout period to 256 ms or ~.25 sec.
         (0<<WDP3 )|(1<<WDP2 )|(0<<WDP1)|(0<<WDP0);
 	
-  /*TCCR4B = (1<<CS42);
-  OCR4B  = 1250;
-  TIMSK4 = TIMSK4|(1 << OCIE4B);
-  TCNT4 = 0;*/	  
-
+  
   sei();                                // Enable all interrupts.
   
   digitalWrite(DrivePin, LOW);
@@ -112,12 +104,6 @@ void setup()
   CompassSetup();
   initAccelGyro();
   heading = getHeading();
-  
-  gyro_buff[0] = gyroz();
-  gyro_buff[1] = gyroz();
-  gyro_buff[2] = gyroz();
-  
-  gyro_avg = (gyro_buff[0] + gyro_buff[1] + gyro_buff[2])/3;
   
   while (!Serial){;}  // Wait for serial connection
   
@@ -262,7 +248,7 @@ void loop()
       // fwd left right encoder direction accelX accelY accelZ gyroX gyroY gyroZ
       sprintf(tmp, "%i_%i_%i_%i_%d_%i_%i_%i_%i_%i_%i\r\n",
               t0, t1, t2, encoderDelta, driveDir, accelx(), accely(),accelz(),
-	      gyrox(), gyroy(), gyroz()); //gyro_avg);
+	      gyrox(), gyroy(), gyroz());
       Serial.print(tmp);    // Send string to GUI
     }
   }
@@ -284,12 +270,3 @@ ISR(WDT_vect)
   turnServo.writeMicroseconds(TurnDefault);
   wdt_reset();              //Call this to reset the timer's value.
 }
-
-/*ISR(TIMER4_COMPB_vect)
-{
-    //Serial.println("interrupt");
-    gyro_buff[gyro_cnt] = gyroz();
-    gyro_avg = (gyro_buff[0] + gyro_buff[1] + gyro_buff[2])/3;
-    gyro_cnt++;
-    gyro_cnt = gyro_cnt%3;
-}*/
